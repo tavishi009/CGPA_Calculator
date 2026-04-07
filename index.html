@@ -389,18 +389,8 @@
     addRow();
   }
 
-  // ── Default: pre-fill with Tavishi's subjects ─────────────
-  const defaultSubjects = [
-    { name: 'Digital Empowerment',                   credit: 2,   grade: 'C'  },
-    { name: 'Introduction to Data Structures',        credit: 4,   grade: 'B'  },
-    { name: 'Basics of Digital Computer',             credit: 4,   grade: 'A+' },
-    { name: 'Mathematics for Computing I',            credit: 4,   grade: 'D'  },
-    { name: 'MATLAB Programming Lab',                 credit: 2,   grade: 'B'  },
-    { name: 'Communication Skills II',                credit: 1.5, grade: 'B'  },
-    { name: 'Data Structure Lab',                     credit: 2,   grade: 'C'  },
-  ];
-
-  defaultSubjects.forEach(s => addRow(s.name, s.credit, s.grade));
+  // ── Default: same as reset state (single empty row) ───────
+  resetAll();
 </script>
 
 </body>

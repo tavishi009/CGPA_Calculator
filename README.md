@@ -6,7 +6,7 @@ Built this because I was tired of calculating my SGPA manually every semester. J
 
 ## How to use it
 
-Open `sgpa_calculator.html` in your browser. It comes pre-filled with sample subjects so you can see how it works. Clear them out, add your own, and hit **Calculate SGPA**.
+Open `index.html` in your browser. It starts with one empty subject row so you can directly enter your own subjects, then hit **Calculate SGPA**.
 
 ---
 
