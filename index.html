@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SGPA Calculator — BIT Mesra</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f7f7f5;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      color: #111;
+    }
+
+    .wrap { max-width: 750px; margin: 0 auto; }
+
+    .header {
+      margin-bottom: 1.5rem;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 4px;
+    }
+    .header p {
+      font-size: 13px;
+      color: #888;
+    }
+
+    /* TABLE */
+    .table-wrap {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 560px; }
+
+    thead tr { background: #f5f5f5; }
+    th {
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #888;
+      text-align: left;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    input[type="text"] {
+      width: 100%;
+      font-size: 13px;
+      padding: 5px 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      color: #111;
+      min-width: 150px;
+    }
+    input[type="number"] {
+      width: 70px;
+      font-size: 13px;
+      padding: 5px 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      color: #111;
+    }
+    select {
+      font-size: 13px;
+      padding: 5px 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      color: #111;
+      background: #fff;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #aaa;
+    }
+
+    .gp-cell {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+    }
+    .remove-btn:hover { color: #e74c3c; }
+
+    .fail-row td { color: #e74c3c; }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .btn {
+      padding: 9px 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #111;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn:hover { background: #f5f5f5; }
+    .btn.primary { background: #111; color: #fff; border-color: #111; }
+    .btn.primary:hover { background: #333; }
+    .btn.danger { color: #e74c3c; border-color: #f5c6c6; }
+    .btn.danger:hover { background: #fff5f5; }
+
+    /* RESULT */
+    .result-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: none;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+    .metric {
+      background: #f7f7f5;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .metric-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #111;
+    }
+    .sgpa-big { font-size: 36px; }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 5px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+
+    /* GRADE REFERENCE */
+    .grade-ref {
+      margin-top: 1.25rem;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 1rem;
+    }
+    .grade-ref-title {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .grade-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid #e5e5e5;
+      color: #888;
+      background: #f7f7f5;
+    }
+
+    @media (max-width: 500px) {
+      .result-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="header">
+    <h1>SGPA Calculator</h1>
+    <p>BIT Mesra &nbsp;|&nbsp; Formula: SGPA = &Sigma;(Credits &times; Grade Point) &divide; &Sigma;Credits</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Subject name</th>
+          <th>Credits (C)</th>
+          <th>Grade</th>
+          <th>Grade point (G)</th>
+          <th>C &times; G</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="subjectBody"></tbody>
+    </table>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="addRow()">+ Add subject</button>
+    <button class="btn primary" onclick="calculate()">Calculate SGPA</button>
+    <button class="btn danger" onclick="resetAll()">Reset</button>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-grid">
+      <div class="metric">
+        <div class="metric-label">SGPA</div>
+        <div class="metric-value sgpa-big" id="resSGPA">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Total credits</div>
+        <div class="metric-value" id="resCreds">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Total C&times;G</div>
+        <div class="metric-value" id="resCG">—</div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <span class="grade-badge" id="resBadge"></span>
+    </div>
+    <div class="grade-ref">
+      <div class="grade-ref-title">Grade scale — BIT Mesra</div>
+      <div class="grade-pills">
+        <span class="pill">O &rarr; 10 (95%+)</span>
+        <span class="pill">A+ &rarr; 10 (90%+)</span>
+        <span class="pill">A &rarr; 9 (80–90%)</span>
+        <span class="pill">B &rarr; 8 (70–80%)</span>
+        <span class="pill">C &rarr; 7 (60–70%)</span>
+        <span class="pill">D &rarr; 6 (50–60%)</span>
+        <span class="pill">E &rarr; 5 (40–50%)</span>
+        <span class="pill">F &rarr; 0 (fail, below 40%)</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Grade Scale ───────────────────────────────────────────
+  const gradePoints = { O: 10, 'A+': 10, A: 9, B: 8, C: 7, D: 6, E: 5, F: 0 };
+  const grades = ['O', 'A+', 'A', 'B', 'C', 'D', 'E', 'F'];
+  let rowCount = 0;
+
+  // ── Grade Dropdown ────────────────────────────────────────
+  function gradeOptions(selected) {
+    return grades.map(g =>
+      `<option value="${g}" ${g === selected ? 'selected' : ''}>${g}</option>`
+    ).join('');
+  }
+
+  // ── Add Row ───────────────────────────────────────────────
+  function addRow(name = '', credit = '', grade = 'B') {
+    rowCount++;
+    const id = rowCount;
+    const body = document.getElementById('subjectBody');
+    const tr = document.createElement('tr');
+    tr.id = 'row-' + id;
+    tr.innerHTML = `
+      <td style="color:#aaa;font-size:12px;">${id}</td>
+      <td><input type="text" placeholder="e.g. Data Structures" value="${name}" id="name-${id}" /></td>
+      <td><input type="number" min="0.5" max="6" step="0.5" placeholder="4" value="${credit}" id="credit-${id}" oninput="updateRow(${id})" /></td>
+      <td>
+        <select id="grade-${id}" onchange="updateRow(${id})">
+          ${gradeOptions(grade)}
+        </select>
+      </td>
+      <td class="gp-cell" id="gp-${id}">${gradePoints[grade]}</td>
+      <td class="gp-cell" id="cg-${id}">—</td>
+      <td><button class="remove-btn" onclick="removeRow(${id})" title="Remove">&times;</button></td>
+    `;
+    body.appendChild(tr);
+    updateRow(id);
+  }
+
+  // ── Update Row Live ───────────────────────────────────────
+  function updateRow(id) {
+    const credit = parseFloat(document.getElementById('credit-' + id)?.value) || 0;
+    const grade  = document.getElementById('grade-' + id)?.value || 'B';
+    const gp     = gradePoints[grade];
+    const cg     = credit * gp;
+
+    const gpEl = document.getElementById('gp-' + id);
+    const cgEl = document.getElementById('cg-' + id);
+    if (gpEl) gpEl.textContent = gp;
+    if (cgEl) cgEl.textContent = credit > 0 ? cg.toFixed(1) : '—';
+
+    const row = document.getElementById('row-' + id);
+    if (row) row.className = grade === 'F' ? 'fail-row' : '';
+  }
+
+  // ── Remove Row ────────────────────────────────────────────
+  function removeRow(id) {
+    const row = document.getElementById('row-' + id);
+    if (row) row.remove();
+  }
+
+  // ── Calculate SGPA ────────────────────────────────────────
+  function calculate() {
+    const rows = document.querySelectorAll('#subjectBody tr');
+    if (rows.length === 0) {
+      alert('Please add at least one subject.');
+      return;
+    }
+
+    let totalC = 0, totalCG = 0, hasFail = false;
+
+    rows.forEach(row => {
+      const id     = row.id.replace('row-', '');
+      const credit = parseFloat(document.getElementById('credit-' + id)?.value) || 0;
+      const grade  = document.getElementById('grade-' + id)?.value || 'B';
+      const gp     = gradePoints[grade];
+
+      if (grade === 'F') hasFail = true;
+      totalC  += credit;
+      totalCG += credit * gp;
+    });
+
+    if (totalC === 0) {
+      alert('Please enter valid credits for your subjects.');
+      return;
+    }
+
+    const sgpa = totalCG / totalC;
+
+    document.getElementById('resSGPA').textContent = sgpa.toFixed(2);
+    document.getElementById('resCreds').textContent = totalC.toFixed(1);
+    document.getElementById('resCG').textContent    = totalCG.toFixed(1);
+
+    // Grade badge
+    const badge = document.getElementById('resBadge');
+    if (hasFail) {
+      badge.textContent = 'Has failed subject(s)';
+      badge.style.cssText = 'background:#fff5f5;color:#e74c3c;border:1px solid #f5c6c6;';
+    } else if (sgpa >= 9) {
+      badge.textContent = 'Outstanding';
+      badge.style.cssText = 'background:#eafaf1;color:#27ae60;border:1px solid #a9dfbf;';
+    } else if (sgpa >= 8) {
+      badge.textContent = 'Excellent';
+      badge.style.cssText = 'background:#eafaf1;color:#27ae60;border:1px solid #a9dfbf;';
+    } else if (sgpa >= 7) {
+      badge.textContent = 'Good';
+      badge.style.cssText = 'background:#eaf4fb;color:#2980b9;border:1px solid #aed6f1;';
+    } else if (sgpa >= 6) {
+      badge.textContent = 'Average';
+      badge.style.cssText = 'background:#fef9e7;color:#d68910;border:1px solid #f9e79f;';
+    } else {
+      badge.textContent = 'Below average';
+      badge.style.cssText = 'background:#fff5f5;color:#e74c3c;border:1px solid #f5c6c6;';
+    }
+
+    document.getElementById('resultCard').style.display = 'block';
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── Reset ─────────────────────────────────────────────────
+  function resetAll() {
+    document.getElementById('subjectBody').innerHTML = '';
+    document.getElementById('resultCard').style.display = 'none';
+    rowCount = 0;
+    addRow();
+  }
+
+  // ── Default: pre-fill with Tavishi's subjects ─────────────
+  const defaultSubjects = [
+    { name: 'Digital Empowerment',                   credit: 2,   grade: 'C'  },
+    { name: 'Introduction to Data Structures',        credit: 4,   grade: 'B'  },
+    { name: 'Basics of Digital Computer',             credit: 4,   grade: 'A+' },
+    { name: 'Mathematics for Computing I',            credit: 4,   grade: 'D'  },
+    { name: 'MATLAB Programming Lab',                 credit: 2,   grade: 'B'  },
+    { name: 'Communication Skills II',                credit: 1.5, grade: 'B'  },
+    { name: 'Data Structure Lab',                     credit: 2,   grade: 'C'  },
+  ];
+
+  defaultSubjects.forEach(s => addRow(s.name, s.credit, s.grade));
+</script>
+
+</body>
+</html>
