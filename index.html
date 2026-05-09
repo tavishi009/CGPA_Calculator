@@ -306,6 +306,8 @@
     `;
     body.appendChild(tr);
     updateRow(id);
+    document.getElementById('subjectBody').lastElementChild
+      .scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   // ── Update Row Live ───────────────────────────────────────
